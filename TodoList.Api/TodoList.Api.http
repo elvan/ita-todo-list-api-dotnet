@@ -1,0 +1,144 @@
+@HostAddress = {{HostAddress}}
+
+### Register new user
+# @name register
+POST {{HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "Test123!"
+}
+
+### Login and save token
+# @name login
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "Test123!"
+}
+
+> {% 
+    client.global.set("auth_token", response.body.token); 
+%}
+
+### Create a new checklist
+# @name createChecklist
+POST {{HostAddress}}/api/checklist
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "title": "My Daily Tasks"
+}
+
+> {% 
+    client.global.set("checklist_id", response.body.id); 
+%}
+
+### Get all checklists
+GET {{HostAddress}}/api/checklist
+Authorization: Bearer {{auth_token}}
+
+### Get specific checklist
+GET {{HostAddress}}/api/checklist/{{checklist_id}}
+Authorization: Bearer {{auth_token}}
+
+### Create todo item in checklist
+# @name createTodoItem
+POST {{HostAddress}}/api/checklist/{{checklist_id}}/items
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "description": "Complete HTTP tests"
+}
+
+> {% 
+    client.global.set("todo_item_id", response.body.id); 
+%}
+
+### Get specific todo item
+GET {{HostAddress}}/api/checklist/{{checklist_id}}/items/{{todo_item_id}}
+Authorization: Bearer {{auth_token}}
+
+### Update todo item
+PUT {{HostAddress}}/api/checklist/{{checklist_id}}/items/{{todo_item_id}}
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "description": "Complete HTTP tests - Updated"
+}
+
+### Update todo item status
+PATCH {{HostAddress}}/api/checklist/{{checklist_id}}/items/{{todo_item_id}}/status
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "isCompleted": true
+}
+
+### Delete todo item
+DELETE {{HostAddress}}/api/checklist/{{checklist_id}}/items/{{todo_item_id}}
+Authorization: Bearer {{auth_token}}
+
+### Delete checklist
+DELETE {{HostAddress}}/api/checklist/{{checklist_id}}
+Authorization: Bearer {{auth_token}}
+
+### Error Cases
+
+### Login with invalid credentials
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+    "username": "nonexistent",
+    "password": "wrong"
+}
+
+### Register with existing username
+POST {{HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "Test123!"
+}
+
+### Access protected route without token
+GET {{HostAddress}}/api/checklist
+
+### Get non-existent checklist
+GET {{HostAddress}}/api/checklist/999
+Authorization: Bearer {{auth_token}}
+
+### Create todo item in non-existent checklist
+POST {{HostAddress}}/api/checklist/999/items
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "description": "This should fail"
+}
+
+### Get non-existent todo item
+GET {{HostAddress}}/api/checklist/{{checklist_id}}/items/999
+Authorization: Bearer {{auth_token}}
+
+### Update non-existent todo item
+PUT {{HostAddress}}/api/checklist/{{checklist_id}}/items/999
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "description": "This should fail"
+}
+
+### Delete non-existent todo item
+DELETE {{HostAddress}}/api/checklist/{{checklist_id}}/items/999
+Authorization: Bearer {{auth_token}}
